@@ -38,7 +38,6 @@ bool Board::checkForSOS(int &sosCount)
                         gameBoard[i][j] = 's';
                         gameBoard[i][j + 1] = 'o';
                         gameBoard[i][j + 2] = 's';
-
                         sosFound = true;
                         sosCount += 1;
                     }
@@ -95,51 +94,7 @@ bool Board::checkForSOS(int &sosCount)
     return sosFound;
 }
 
-// Implementation of the new method
-std::vector<std::pair<int, int>> Board::findAllSOS()
-{
-    std::vector<std::pair<int, int>> sosPositions;
 
-    for (int i = 0; i < boardSize; ++i)
-    {
-        for (int j = 0; j < boardSize; ++j)
-        {
-            if (toupper(gameBoard[i][j]) == 'S')
-            {
-                // Check horizontal
-                if (j + 2 < boardSize && toupper(gameBoard[i][j + 1]) == 'O' && toupper(gameBoard[i][j + 2]) == 'S')
-                {
-                    sosPositions.emplace_back(i, j);
-                    sosPositions.emplace_back(i, j + 1);
-                    sosPositions.emplace_back(i, j + 2);
-                }
-                // Check vertical
-                if (i + 2 < boardSize && toupper(gameBoard[i + 1][j]) == 'O' && toupper(gameBoard[i + 2][j]) == 'S')
-                {
-                    sosPositions.emplace_back(i, j);
-                    sosPositions.emplace_back(i + 1, j);
-                    sosPositions.emplace_back(i + 2, j);
-                }
-                // Check diagonal (top-left to bottom-right)
-                if (i + 2 < boardSize && j + 2 < boardSize && toupper(gameBoard[i + 1][j + 1]) == 'O' && toupper(gameBoard[i + 2][j + 2]) == 'S')
-                {
-                    sosPositions.emplace_back(i, j);
-                    sosPositions.emplace_back(i + 1, j + 1);
-                    sosPositions.emplace_back(i + 2, j + 2);
-                }
-                // Check diagonal (top-right to bottom-left)
-                if (i + 2 < boardSize && j - 2 >= 0 && toupper(gameBoard[i + 1][j - 1]) == 'O' && toupper(gameBoard[i + 2][j - 2]) == 'S')
-                {
-                    sosPositions.emplace_back(i, j);
-                    sosPositions.emplace_back(i + 1, j - 1);
-                    sosPositions.emplace_back(i + 2, j - 2);
-                }
-            }
-        }
-    }
-
-    return sosPositions;
-}
 
 //Checks if board is full
 bool Board::boardFull() const
@@ -183,15 +138,6 @@ void Board::setBoardElement(int row, int col, char value)
 {
     //qDebug() << "The element to set is " << row << "," << col;
     gameBoard[row][col] = value;
-//    if (row >= 0 && row < gameBoard.size() && col >= 0 && col < gameBoard[0].size())
-//    {
-//        gameBoard[row][col] = value; // Set the value at the specified row and column
-//    }
-//    else
-//    {
-//        // Handle out-of-bounds error or provide an error message
-//        qDebug() << "DIDNT PUT ANYTHING IN THE ELEMENT";
-//    }
 }
 
 //boardSize getter setter

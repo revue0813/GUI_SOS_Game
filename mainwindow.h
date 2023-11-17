@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QDebug>
 #include "board.h"
 #include "player.h"
 
@@ -15,6 +16,12 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+private:
+    Ui::MainWindow *ui;
+    string currentPlayer;
+    Board gameBoard;
+    Player bluePlayer;
+    Player redPlayer;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -23,13 +30,14 @@ public:
     void populateGameBoard();
     void findButtonCell(QPushButton *targetButton, int &row, int &column);
     void changeGameInfoText(const QString &gameInfoQString);
-    void handleHumanMove(int row, int col, QPushButton *targetButton);
     void changeTurnInfoText(const QString &turnInfoQString);
     void switchPlayerTurn();
     void endGame();
+    void handleHumanMove(int row, int col, QPushButton *targetButton);
     void handleComputerMove();
-    void outputButtonsInfo();
     void addStartButtonBack();
+    void outputButtonsInfo();
+
 private slots:
     void on_startGameButton_clicked();
     void on_boardSizeSpinBox_valueChanged(int arg1);
@@ -39,11 +47,6 @@ private slots:
     void on_redPlayerComboBox_activated(int index);
     void on_blueLetterComboBox_activated(int index);
     void on_redLetterComboBox_activated(int index);
-private:
-    Ui::MainWindow *ui;
-    string currentPlayer;
-    Board gameBoard;
-    Player bluePlayer;
-    Player redPlayer;
+
 };
 #endif // MAINWINDOW_H

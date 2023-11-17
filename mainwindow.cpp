@@ -1,8 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QDebug>
-#include <QPainter>
-#include <QPaintEvent>
 
 //MainWindow Constructor
 MainWindow::MainWindow(QWidget *parent)
@@ -262,7 +260,7 @@ void MainWindow::handleHumanMove(int row, int col, QPushButton *targetButton)
         return;
     }
 
-    // Check for win conditions, e.g., after each move
+    // Check for win conditions, after each move
     int sosCount = 0;
     if (gameBoard.checkForSOS(sosCount))
     {
@@ -276,20 +274,22 @@ void MainWindow::handleHumanMove(int row, int col, QPushButton *targetButton)
             {
                 do
                 {
-                //qDebug() << "Player score before increment: " << bluePlayer.getScore();
-                bluePlayer.incrementScore();
-                ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
-                //qDebug() << "Player score after increment: " << bluePlayer.getScore();
-                sosCount -= 1;
+                    //qDebug() << "Player score before increment: " << bluePlayer.getScore();
+                    bluePlayer.incrementScore();
+                    ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
+                    //qDebug() << "Player score after increment: " << bluePlayer.getScore();
+
+                    sosCount -= 1;
                 }while (sosCount != 0);
+
             }
             else
             {
                 do
                 {
-                redPlayer.incrementScore();
-                ui->redScoreSpinBox->setValue(redPlayer.getScore());
-                sosCount -= 1;
+                    redPlayer.incrementScore();
+                    ui->redScoreSpinBox->setValue(redPlayer.getScore());
+                    sosCount -= 1;
                 }while (sosCount != 0);
             }
         }
@@ -384,20 +384,20 @@ void MainWindow::handleComputerMove()
             {
                 do
                 {
-                //qDebug() << "Player score before increment: " << bluePlayer.getScore();
-                bluePlayer.incrementScore();
-                ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
-                //qDebug() << "Player score after increment: " << bluePlayer.getScore();
-                sosCount -= 1;
+                    //qDebug() << "Player score before increment: " << bluePlayer.getScore();
+                    bluePlayer.incrementScore();
+                    ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
+                    //qDebug() << "Player score after increment: " << bluePlayer.getScore();
+                    sosCount -= 1;
                 }while (sosCount != 0);
             }
             else
             {
                 do
                 {
-                redPlayer.incrementScore();
-                ui->redScoreSpinBox->setValue(redPlayer.getScore());
-                sosCount -= 1;
+                    redPlayer.incrementScore();
+                    ui->redScoreSpinBox->setValue(redPlayer.getScore());
+                    sosCount -= 1;
                 }while (sosCount != 0);
             }
         }
@@ -454,7 +454,7 @@ void MainWindow::outputButtonsInfo()
                 // Check if the item is a QPushButton
                 if ((qobject_cast<QPushButton *>(item->widget())) != nullptr)
                 {
-                qDebug() << "Button at (" << row << ", " << col << ")";
+                    qDebug() << "Button at (" << row << ", " << col << ")";
                 }
             }
         }
@@ -474,6 +474,8 @@ void MainWindow::on_startGameButton_clicked()
         delete item->widget(); // Delete the button
         delete item;           // Delete the layout item
     }
+
+
 
     qDebug() << "You pressed the Start button";
     outputButtonsInfo();

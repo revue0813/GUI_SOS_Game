@@ -3,8 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "QPushButton"
-#include "QGridLayout"
+
 
 using namespace std;
 
@@ -12,6 +11,12 @@ class Board
 {
 public:
     Board();
+
+    //Class functions
+    bool isCellEmpty(int &row, int &col);
+    bool boardFull() const;
+    bool checkForSOS(int &sosCount);
+    void computerMakeRandomMove(int &row, int &col);
 
     //Getter setters
     void initializeBoard();
@@ -26,17 +31,10 @@ public:
     void setBoardElement(int row, int col, char value);
     char getBoardElement(int row, int col) const;
 
-    //Class functions
-    bool isCellEmpty(int &row, int &col);
-    bool boardFull() const;
-    bool checkForSOS(int &sosCount);
-    void computerMakeRandomMove(int &row, int &col);
-
-    std::vector<std::pair<int, int> > findAllSOS();
 private:
     vector<vector<char>> gameBoard;
-    int boardSize;
     string gameMode;
+    int boardSize;
 
 };
 
