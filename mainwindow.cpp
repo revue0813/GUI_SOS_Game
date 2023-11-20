@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
             , &MainWindow::on_gameMode_selected);
 
     // Check if game board is not null
-    qDebug() << "gameBoardGridLayout status: " << ui->gameBoardGridLayout;
+    // qDebug() << "gameBoardGridLayout status: " << ui->gameBoardGridLayout;
 
 }
 
@@ -324,17 +324,18 @@ void MainWindow::handleHumanMove(int row, int col, QPushButton *targetButton)
 void MainWindow::handleComputerMove()
 {
     int row = -1, col = -1;
+
     //COMPUTER LOGIC MAGIC HERE
     if (currentPlayer == "Blue")
     {
         //Make the move
         gameBoard.computerMakeRandomMove(row, col);
 
-        char newLetter = redPlayer.chooseRandomLetter();
+        bluePlayer.chooseRandomLetter();
 
-        gameBoard.setBoardElement(row, col, newLetter);
+        gameBoard.setBoardElement(row, col, bluePlayer.getPlayerLetter());
 
-        qDebug() << "Set element" << row << "," << col << "to" << newLetter;
+        qDebug() << "Set element" << row << "," << col << "to" << bluePlayer.getPlayerLetter();
 
         //Update the UI
         QLayoutItem *buttonItem = ui->gameBoardGridLayout->itemAtPosition(row, col);
@@ -342,7 +343,7 @@ void MainWindow::handleComputerMove()
         {
             //qDebug() << "Found button converting...";
             QPushButton *finalButton = qobject_cast<QPushButton *>(buttonItem->widget());
-            QString buttonText(newLetter);
+            QString buttonText(bluePlayer.getPlayerLetter());
             finalButton->setText(buttonText);
             //qDebug() << "Should've placed a " << bluePlayer.getPlayerLetter() << " at " << row << ", " << col;
         }
@@ -353,11 +354,11 @@ void MainWindow::handleComputerMove()
 
         //qDebug() << "RANDOM MOVE WAS " << row << "," << col;
 
-        char newLetter = redPlayer.chooseRandomLetter();
+        redPlayer.chooseRandomLetter();
 
-        gameBoard.setBoardElement(row, col, newLetter);
+        gameBoard.setBoardElement(row, col, redPlayer.getPlayerLetter());
 
-        qDebug() << "Set element" << row << "," << col << "to" << newLetter;
+        qDebug() << "Set element" << row << "," << col << "to" << redPlayer.getPlayerLetter();
 
         //Update the UI
         QLayoutItem *buttonItem = ui->gameBoardGridLayout->itemAtPosition(row, col);
@@ -365,7 +366,7 @@ void MainWindow::handleComputerMove()
         {
             //qDebug() << "Found button converting...";
             QPushButton *finalButton = qobject_cast<QPushButton *>(buttonItem->widget());
-            QString buttonText(newLetter);
+            QString buttonText(redPlayer.getPlayerLetter());
             finalButton->setText(buttonText);
             //qDebug() << "Should've placed a " << redPlayer.getPlayerLetter() << " at " << row << ", " << col;
         }
@@ -377,6 +378,7 @@ void MainWindow::handleComputerMove()
     {
         //qDebug() << currentPlayer << " has scored!";
         //qDebug() << "The game Mode is " << gameBoard.getGameMode();
+
         //General game logic
         if (gameBoard.getGameMode() == "General")
         {
@@ -414,6 +416,16 @@ void MainWindow::handleComputerMove()
         return;
     }
     switchPlayerTurn();
+
+    // If computer handle the computer turn
+    if (currentPlayer == "Blue" && bluePlayer.getPlayertype() == "Computer")
+    {
+        handleComputerMove();
+    }
+    else if (currentPlayer == "Red" && redPlayer.getPlayertype() == "Computer")
+    {
+        handleComputerMove();
+    }
 }
 
 //Add start game button back to ui

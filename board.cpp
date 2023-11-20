@@ -1,8 +1,5 @@
 #include "board.h"
 
-
-using namespace std;
-
 void Board::computerMakeRandomMove(int &row, int &col)
 {
     do

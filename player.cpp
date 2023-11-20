@@ -1,21 +1,28 @@
 #include "player.h"
 
-char Player::chooseRandomLetter()
+void Player::chooseRandomLetter()
 {
-    // Get random value even or ood
-    srand(static_cast<unsigned int>(time(nullptr)));
-    int random_value = rand();
-    random_value = random_value % 2;
+    // Use the random_device to seed the random number generator
+    std::random_device rd;
+
+    // Use the random device to seed the random number generator engine
+    std::default_random_engine generator(rd());
+
+    // Create a distribution to generate either 0 or 1
+    std::uniform_int_distribution<int> distribution(0, 1);
+
+    // Generate the random value (0 or 1)
+    int random_value = distribution(generator);
 
     qDebug() << "Random letter value is " << random_value;
 
     if (random_value == 0)
     {
-        return 'S';
+        pLetter = 'S';
     }
     else
     {
-        return 'O';
+        pLetter = 'O';
     }
 }
 

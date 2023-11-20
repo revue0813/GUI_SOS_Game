@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <QDebug>
+#include <random>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ class Player
 
 public:
     //Class Methods
-    char chooseRandomLetter();
+    void chooseRandomLetter();
     void incrementScore();
 
     //Getter Setters
