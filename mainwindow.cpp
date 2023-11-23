@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <QDebug>
+
 
 //MainWindow Constructor
 MainWindow::MainWindow(QWidget *parent)
@@ -37,7 +37,7 @@ MainWindow::~MainWindow()
 //Populates game board on gameBoardGridLayout
 void MainWindow::populateGameBoard()
 {
-    //qDebug() << "POPULATING GAME BOARD";
+    qDebug() << "POPULATING GAME BOARD";
     //qDebug() << "Board size is " << gameBoard.getBoardSize();
 
     for (int i = 0; i < gameBoard.getBoardSize(); ++i)
@@ -67,14 +67,24 @@ void MainWindow::findButtonCell(QPushButton *targetButton, int &row, int &column
     //get game board layout
     QGridLayout *layout = ui->gameBoardGridLayout;
 
+    //BUTTON DEBUG
+    //qDebug() << "Target button is " << targetButton;
+    //qDebug() << "Layout row and col count: "
+    //         << layout->rowCount()
+    //         << layout->columnCount();
+    //qDebug() << "Layout row and col count: "
+    //         << ui->gameBoardGridLayout->rowCount()
+    //         << ui->gameBoardGridLayout->columnCount();
+
     //Search for Cell in layout
-    for (int r = 0; r < layout->rowCount(); ++r)
+    for (int r = 0; r < gameBoard.getBoardSize(); ++r)
     {
-        for (int c = 0; c < layout->columnCount(); ++c)
+        for (int c = 0; c < gameBoard.getBoardSize(); ++c)
         {
             QLayoutItem *item = layout->itemAtPosition(r, c);
             if (item->widget() == targetButton)
             {
+                //qDebug() << "Reached this point";
                 //Change row and col to reflect button location
                 row = r;
                 column = c;
@@ -101,7 +111,7 @@ void MainWindow::changeGameInfoText(const QString &gameInfoQString)
         }
         else if (existingPushButton)
         {
-            //qDebug() << "Found existing Label!";
+            qDebug() << "Found existing Button!";
             ui->infoLayout->removeWidget(existingPushButton);
             delete existingPushButton; //Remove the push button and free memory
         }
@@ -244,6 +254,7 @@ void MainWindow::handleHumanMove(int row, int col, QPushButton *targetButton)
     // Red Player
     else if (gameBoard.isCellEmpty(row, col) && currentPlayer == "Red")
     {
+        qDebug() << "Setting game board element at " << row << col;
         gameBoard.setBoardElement(row, col, redPlayer.getPlayerLetter());
 
         QString buttonText(redPlayer.getPlayerLetter());
@@ -433,12 +444,22 @@ void MainWindow::addStartButtonBack()
 {
     //Check for existing label
     QLabel *existingLabel = ui->centralwidget->findChild<QLabel *>("gameInfoLabel");
+    QPushButton *existingPushButton = ui->centralwidget->findChild<QPushButton *>("startGameButton");
 
-    if (existingLabel)
+    if (existingLabel || existingPushButton)
     {
-        //qDebug() << "Found existing Label!";
-        ui->infoLayout->removeWidget(existingLabel);
-        delete existingLabel; //Remove the label and free memory
+        if (existingLabel)
+        {
+            //qDebug() << "Found existing Label!";
+            ui->infoLayout->removeWidget(existingLabel);
+            delete existingLabel; //Remove the label and free memory
+        }
+        else if (existingPushButton)
+        {
+            qDebug() << "Found existing Button!";
+            ui->infoLayout->removeWidget(existingPushButton);
+            delete existingPushButton; //Remove the push button and free memory
+        }
     }
 
     QPushButton *newStartGameButton = new QPushButton("Start New Game", this); //create new start game button
@@ -446,6 +467,147 @@ void MainWindow::addStartButtonBack()
     newStartGameButton->setFixedSize(newStartGameButton->sizeHint()); //set size of new start game button to text size
     connect(newStartGameButton, &QPushButton::clicked, this, &MainWindow::on_startGameButton_clicked);
     ui->infoLayout->addWidget(newStartGameButton); //add button to game board layout
+}
+
+// Saves gameBoard (UPDATE TO SAVE CURRENT PLAYER, BLUE AND RED PLAYER SETTINGS)
+void MainWindow::saveBoardToJson(const Board& board)
+{
+    QJsonObject gameDataJson;
+
+    // Save game board
+    QJsonObject boardJson = board.toJson();
+    gameDataJson["board"] = boardJson;
+
+    // Save blue player
+    QJsonObject bluePlayerJson = bluePlayer.toJson();
+    gameDataJson["bluePlayer"] = bluePlayerJson;
+
+    // Save red player
+    QJsonObject redPlayerJson = redPlayer.toJson();
+    gameDataJson["redPlayer"] = redPlayerJson;
+
+    gameDataJson["currentPlayer"] = QString::fromStdString(currentPlayer);
+
+    QJsonDocument gameDataDoc(gameDataJson);
+
+    QFile file("board_data.json");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(gameDataDoc.toJson());
+        file.close();
+        qDebug() << "Data saved to JSON file.";
+        qDebug() << "Current working directory: " << QDir::currentPath();
+    }
+    else
+    {
+        qDebug() << "Error saving game data to JSON file.";
+    }
+}
+
+// Loads gameBoard from file (UPDATE TO LOAD CURRENT PLAYER, BLUE AND RED PLAYER)
+void MainWindow::loadBoardFromJson(Board& board)
+{
+    QFile file("board_data.json");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QJsonDocument loadedJsonDoc = QJsonDocument::fromJson(file.readAll());
+        file.close();
+
+        if (loadedJsonDoc.isObject())
+        {
+            QJsonObject gameDataJson = loadedJsonDoc.object();
+
+            // Load game board
+            if (gameDataJson.contains("board"))
+            {
+                QJsonObject boardJson = gameDataJson["board"].toObject();
+                board.fromJson(boardJson);
+                qDebug() << "Board data loaded from JSON file.";
+            }
+            else
+            {
+                qDebug() << "Error: Missing 'board' data in JSON file.";
+            }
+
+            // Load blue player
+            if (gameDataJson.contains("bluePlayer"))
+            {
+                QJsonObject bluePlayerJson = gameDataJson["bluePlayer"].toObject();
+                bluePlayer.fromJson(bluePlayerJson);
+                qDebug() << "Blue player data loaded from JSON file.";
+            }
+            else
+            {
+                qDebug() << "Error: Missing 'bluePlayer' data in JSON file.";
+            }
+
+            // Load red player
+            if (gameDataJson.contains("redPlayer"))
+            {
+                QJsonObject redPlayerJson = gameDataJson["redPlayer"].toObject();
+                redPlayer.fromJson(redPlayerJson);
+                qDebug() << "Red player data loaded from JSON file.";
+            }
+            else
+            {
+                qDebug() << "Error: Missing 'redPlayer' data in JSON file.";
+            }
+            if (gameDataJson.contains("currentPlayer"))
+            {
+                currentPlayer = gameDataJson["currentPlayer"].toString().toStdString();
+            }
+        }
+        else
+        {
+            qDebug() << "Error: Invalid JSON format in file.";
+        }
+    }
+    else
+    {
+        qDebug() << "Error opening JSON file.";
+    }
+}
+
+//updates ui buttons to gameBoard in Board class
+void MainWindow::updateGameBoardButtons()
+{
+    gameBoard.showBoardInfo();
+    for (int row = 0; row < gameBoard.getBoardSize(); ++row)
+    {
+        for (int col = 0; col < gameBoard.getBoardSize(); ++col)
+        {
+            QLayoutItem *item = ui->gameBoardGridLayout->itemAtPosition(row, col);
+            if (item)
+            {
+                QPushButton *button = qobject_cast<QPushButton *>(item->widget());
+                if (button)
+                {
+                    char cellValue = toupper(gameBoard.getBoardElement(row, col));
+                    qDebug() << "Cell Value at " << row << col << "is" << cellValue;
+                    button->setText(QString(cellValue));
+                }
+            }
+        }
+    }
+}
+
+// Function to check if a file exists
+bool fileExists(const QString& filePath)
+{
+    QFile file(filePath);
+    return file.exists();
+}
+
+void MainWindow::removeSaveFile(const QString &filePath)
+{
+    if (QFile::remove(filePath))
+    {
+        qDebug() << "File removed successfully";
+    }
+    else
+    {
+        qDebug() << "Error removing file";
+    }
 }
 
 
@@ -475,6 +637,106 @@ void MainWindow::outputButtonsInfo()
 
 
 //SLOTS
+//When the save game button is clicked
+void MainWindow::on_saveGameButton_clicked()
+{
+    if (gameBoard.getGameBoard().empty())
+    {
+        qDebug() << "Game board is empty, can't save";
+    }
+    else
+    {
+        saveBoardToJson(gameBoard);
+        endGame();
+        changeTurnInfoText("Game Saved! Click Start New Game to play again.");
+        ui->saveGameButton->setEnabled(false);
+    }
+}
+
+//When the load game button is clicked
+void MainWindow::on_loadGameButton_clicked()
+{
+
+    if (fileExists("board_data.json"))
+    {
+        gameBoard.initializeBoard();
+        endGame();
+
+        // Remove all game board buttons from game board
+        QLayoutItem *item;
+        while ((item = ui->gameBoardGridLayout->takeAt(0)) != nullptr)
+        {
+            QWidget *widget = item->widget();
+            delete widget; // Delete the button
+            delete item;   // Delete the layout item
+        }
+
+        loadBoardFromJson(gameBoard);
+        //gameBoard.showBoardInfo();
+
+        ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
+        ui->redScoreSpinBox->setValue(redPlayer.getScore());
+        ui->saveGameButton->setEnabled(true);
+
+        populateGameBoard();
+
+        updateGameBoardButtons();
+
+        //change gameMode to QString from String
+        QString qStringGameMode = QString::fromStdString("You loaded a "
+                                                         + gameBoard.getGameMode()
+                                                         + " Game!");
+        changeGameInfoText(qStringGameMode);
+
+        QString qStringTurnInfo = QString::fromStdString(currentPlayer
+                                                         + " Players turn");
+
+        changeTurnInfoText(qStringTurnInfo);
+
+        if (bluePlayer.getPlayertype() == "Human")
+        {
+            ui->bluePlayerComboBox->setCurrentIndex(0);
+        }
+        else
+        {
+            ui->bluePlayerComboBox->setCurrentIndex(1);
+        }
+
+        if (redPlayer.getPlayertype() == "Human")
+        {
+            ui->redPlayerComboBox->setCurrentIndex(0);
+        }
+        else
+        {
+            ui->redPlayerComboBox->setCurrentIndex(1);
+        }
+
+        //Hide game options
+        ui->simpleGameRadioButton->setEnabled(false);
+        ui->generalGameRadioButton->setEnabled(false);
+        ui->boardSizeSpinBox->setEnabled(false);
+
+        //Hide the score for a simple game
+        if (gameBoard.getGameMode() == "Simple")
+        {
+            ui->blueScoreLabel->hide();
+            ui->blueScoreSpinBox->hide();
+            ui->redScoreLabel->hide();
+            ui->redScoreSpinBox->hide();
+        }
+
+        if (bluePlayer.getPlayertype() == "Computer")
+        {
+            handleComputerMove();
+            ui->blueLetterComboBox->hide();
+        }
+
+    }
+    else
+    {
+        qDebug() << "Save file does not exist";
+    }
+}
 
 //When the start game button is clicked (released)
 void MainWindow::on_startGameButton_clicked()
@@ -483,27 +745,27 @@ void MainWindow::on_startGameButton_clicked()
     QLayoutItem *item;
     while ((item = ui->gameBoardGridLayout->takeAt(0)) != nullptr)
     {
-        delete item->widget(); // Delete the button
-        delete item;           // Delete the layout item
+        QWidget *widget = item->widget();
+        delete widget; // Delete the button
+        delete item;   // Delete the layout item
     }
-
-
 
     qDebug() << "You pressed the Start button";
     outputButtonsInfo();
+
+    //qDebug() << "SIZE OF GAME BOARD AFTER DELETION IS " << ui->gameBoardGridLayout->rowCount() << ui->gameBoardGridLayout->columnCount();
 
     currentPlayer = "Blue"; //Blue player starts
     bluePlayer.setScore(0); //Reset scores to 0
     redPlayer.setScore(0);
     ui->blueScoreSpinBox->setValue(bluePlayer.getScore());
     ui->redScoreSpinBox->setValue(redPlayer.getScore());
+    ui->saveGameButton->setEnabled(true);
 
     //Old hiding
     //ui->startGameButton->hide();
     gameBoard.initializeBoard();
     populateGameBoard();
-
-    outputButtonsInfo();
 
     //change gameMode to QString from String
     QString qStringGameMode = QString::fromStdString("You started a new "
@@ -541,12 +803,12 @@ void MainWindow::on_startGameButton_clicked()
 void MainWindow::on_boardSizeSpinBox_valueChanged(int arg1)
 {
     //Check board size before change
-    qDebug() << "changing boardsize to " << arg1;
+    //qDebug() << "changing boardsize to " << arg1;
 
     gameBoard.setBoardSize(arg1);
 
     //Check board size after change
-    qDebug() << "Board size is " << gameBoard.getBoardSize();
+    //qDebug() << "Board size is " << gameBoard.getBoardSize();
 }
 
 //When a button on the game board is clicked
@@ -560,9 +822,11 @@ void MainWindow::on_newButton_clicked()
 
     findButtonCell(clickedButton, row, col);
 
+    qDebug() << currentPlayer << " Player clicked " << row << ", " << col;
+
     handleHumanMove(row, col, clickedButton);
 
-    //qDebug() << currentPlayer << " Player clicked " << row << ", " << col;
+
 
     //qDebug() << "The value at " << row << ", " << col
     //         << " is " << gameBoard.getBoardElement(row, col);
@@ -579,13 +843,13 @@ void MainWindow::on_gameMode_selected()
     {
         qDebug() << "Simple Game selected!";
         gameBoard.setGameMode("Simple");
-        qDebug() << "gameMode is " << gameBoard.getGameMode();
+        //qDebug() << "gameMode is " << gameBoard.getGameMode();
     }
     else if (ui->generalGameRadioButton->isChecked())
     {
         qDebug() << "General Game selected!";
         gameBoard.setGameMode("General");
-        qDebug() << "gameMode is " << gameBoard.getGameMode();
+        //qDebug() << "gameMode is " << gameBoard.getGameMode();
     }
 }
 
@@ -644,3 +908,5 @@ void MainWindow::on_redLetterComboBox_activated(int index)
     }
     qDebug() << "Red Player has changed letter to " << redPlayer.getPlayerLetter();
 }
+
+

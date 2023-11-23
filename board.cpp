@@ -1,5 +1,86 @@
 #include "board.h"
 
+//Returns true if game board is empty
+bool Board::isEmpty() const
+{
+    for (int i = 0; i < boardSize; ++i)
+    {
+        for (int j = 0; j < boardSize; ++j)
+        {
+            if (gameBoard[i][j] != ' ')
+            {
+                // There is a non-empty cell, so the board is not empty
+                return false;
+            }
+        }
+    }
+
+    // All cells are empty, so the board is empty
+    return true;
+}
+
+//Debug command for showing all cells of a game board with values
+void Board::showBoardInfo()
+{
+    for (int i = 0; i < boardSize; ++i)
+    {
+        for (int j = 0; j < boardSize; ++j)
+        {
+            qDebug() << "Getting board element at (" << i << "," << j << ")\n";
+            qDebug() << "Element is" << gameBoard[i][j];
+        }
+    }
+}
+
+//Returns json of game board
+QJsonObject Board::toJson() const
+{
+    QJsonObject json;
+
+    // Convert boardSize and gameMode
+    json["boardSize"] = boardSize;
+    json["gameMode"] = QString::fromStdString(gameMode);
+
+    // Convert gameBoard to a nested QJsonArray
+    QJsonArray boardArray;
+    for (const auto& row : gameBoard)
+    {
+        QJsonArray rowArray;
+        for (char cell : row)
+        {
+            rowArray.append(QString(cell));
+        }
+        boardArray.append(rowArray);
+    }
+    json["gameBoard"] = boardArray;
+
+    return json;
+}
+
+//Clears game board and takes new game board from file
+void Board::fromJson(const QJsonObject& json)
+{
+    // Retrieve boardSize and gameMode
+    boardSize = json["boardSize"].toInt();
+    gameMode = json["gameMode"].toString().toStdString();
+
+    // Retrieve gameBoard from the nested QJsonArray
+    QJsonArray boardArray = json["gameBoard"].toArray();
+    gameBoard.clear();
+    for (const auto& row : boardArray)
+    {
+        QJsonArray rowArray = row.toArray();
+        std::vector<char> rowVector;
+        for (const auto& cell : rowArray)
+        {
+            rowVector.push_back(cell.toString().at(0).toLatin1());
+            qDebug() << "Cell Value: " << cell.toString().at(0).toLatin1();
+        }
+        gameBoard.push_back(rowVector);
+    }
+}
+
+//Sets row and col to random cell inside board
 void Board::computerMakeRandomMove(int &row, int &col)
 {
     do
@@ -90,8 +171,6 @@ bool Board::checkForSOS(int &sosCount)
     }
     return sosFound;
 }
-
-
 
 //Checks if board is full
 bool Board::boardFull() const

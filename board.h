@@ -3,7 +3,8 @@
 
 #include <string>
 #include <vector>
-
+#include <QJsonArray>
+#include <QJsonObject>
 
 using namespace std;
 
@@ -31,6 +32,10 @@ public:
     void setBoardElement(int row, int col, char value);
     char getBoardElement(int row, int col) const;
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject &json);
+    void showBoardInfo();
+    bool isEmpty() const;
 private:
     vector<vector<char>> gameBoard;
     string gameMode;

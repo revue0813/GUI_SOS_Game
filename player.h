@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <QDebug>
+#include <QJsonObject>
 #include <random>
 
 using namespace std;
@@ -27,6 +28,8 @@ public:
 
     Player(const string &color);
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject &playerJson);
 private:
     string ptype;
     char pLetter;

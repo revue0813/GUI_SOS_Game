@@ -1,5 +1,37 @@
 #include "player.h"
 
+// In player.cpp
+QJsonObject Player::toJson() const {
+    QJsonObject playerJson;
+    playerJson["ptype"] = QString::fromStdString(ptype);
+    playerJson["score"] = score;
+
+    return playerJson;
+}
+
+void Player::fromJson(const QJsonObject &playerJson)
+{
+    if (playerJson.contains("ptype") && playerJson["ptype"].isString())
+    {
+        ptype = playerJson["ptype"].toString().toStdString();
+    }
+    else
+    {
+        qDebug() << "Error: Invalid or missing 'name' field in player JSON.";
+    }
+
+    if (playerJson.contains("score") && playerJson["score"].isDouble())
+    {
+        score = static_cast<int>(playerJson["score"].toDouble());
+    }
+    else
+    {
+        qDebug() << "Error: Invalid or missing 'score' field in player JSON.";
+    }
+
+    // Add other player-specific fields as needed
+}
+
 void Player::chooseRandomLetter()
 {
     // Use the random_device to seed the random number generator

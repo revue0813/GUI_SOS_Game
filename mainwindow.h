@@ -5,6 +5,9 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QFile>
+#include <QDir>
 #include "board.h"
 #include "player.h"
 
@@ -38,6 +41,11 @@ public:
     void addStartButtonBack();
     void outputButtonsInfo();
 
+    void saveBoardToJson(const Board &board);
+
+    void loadBoardFromJson(Board &board);
+    void updateGameBoardButtons();
+    void removeSaveFile(const QString &filePath);
 private slots:
     void on_startGameButton_clicked();
     void on_boardSizeSpinBox_valueChanged(int arg1);
@@ -47,6 +55,7 @@ private slots:
     void on_redPlayerComboBox_activated(int index);
     void on_blueLetterComboBox_activated(int index);
     void on_redLetterComboBox_activated(int index);
-
+    void on_saveGameButton_clicked();
+    void on_loadGameButton_clicked();
 };
 #endif // MAINWINDOW_H
